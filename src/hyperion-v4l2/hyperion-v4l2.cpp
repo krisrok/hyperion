@@ -128,13 +128,14 @@ int main(int argc, char** argv)
 					std::max(1, argSizeDecimation.getValue()));
 
 		// set signal detection
-		grabber.setSignalThreshold(
+		grabber.setNoSignal(10, 32,
+					50,
 					std::min(1.0, std::max(0.0, argRedSignalThreshold.isSet() ? argRedSignalThreshold.getValue() : argSignalThreshold.getValue())),
 					std::min(1.0, std::max(0.0, argGreenSignalThreshold.isSet() ? argGreenSignalThreshold.getValue() : argSignalThreshold.getValue())),
 					std::min(1.0, std::max(0.0, argBlueSignalThreshold.isSet() ? argBlueSignalThreshold.getValue() : argSignalThreshold.getValue())),
-					0.2,
-					50,
-					32);
+					
+					0,
+					0.0, 0.0, 0.0, 0.0);
 
 		// set cropping values
 		grabber.setCropping(

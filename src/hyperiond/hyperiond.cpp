@@ -319,17 +319,32 @@ void startGrabberV4L2(const Json::Value &config, Hyperion &hyperion, ProtoServer
 					grabberConfig.get("height", -1).asInt(),
 					grabberConfig.get("frameDecimation", 2).asInt(),
 					grabberConfig.get("sizeDecimation", 8).asInt(),
-					grabberConfig.get("redSignalThreshold", 0.0).asDouble(),
-					grabberConfig.get("greenSignalThreshold", 0.0).asDouble(),
-					grabberConfig.get("blueSignalThreshold", 0.0).asDouble(),
+					//grabberConfig.get("redSignalThreshold", 0.0).asDouble(),
+					//grabberConfig.get("greenSignalThreshold", 0.0).asDouble(),
+					//grabberConfig.get("blueSignalThreshold", 0.0).asDouble(),
 					&hyperion,
 					grabberConfig.get("priority", 900).asInt());
+
 		v4l2Grabber->set3D(parse3DMode(grabberConfig.get("mode", "2D").asString()));
+
 		v4l2Grabber->setCropping(
 					grabberConfig.get("cropLeft", 0).asInt(),
 					grabberConfig.get("cropRight", 0).asInt(),
 					grabberConfig.get("cropTop", 0).asInt(),
 					grabberConfig.get("cropBottom", 0).asInt());
+
+		v4l2Grabber->setNoSignal(
+					grabberConfig.get("noSignalFrameDecimation", 10).asInt(),
+					grabberConfig.get("noSignalPixelCounterThreshold", 32).asInt(),
+					grabberConfig.get("noSignalBlackFrameCounterThreshold", 50).asInt(),
+					grabberConfig.get("noSignalBlackRed", grabberConfig.get("redSignalThreshold", 0.0).asDouble()).asDouble(),
+					grabberConfig.get("noSignalBlackGreen", grabberConfig.get("greenSignalThreshold", 0.0).asDouble()).asDouble(),
+					grabberConfig.get("noSignalBlackBlue", grabberConfig.get("blueSignalThreshold", 0.0).asDouble()).asDouble(),
+					grabberConfig.get("noSignalColorFrameCounterThreshold", 0).asInt(),
+					grabberConfig.get("noSignalColorRed", 0.0).asDouble(),
+					grabberConfig.get("noSignalColorGreen", 0.0).asDouble(),
+					grabberConfig.get("noSignalColorBlue", 0.0).asDouble(),
+					grabberConfig.get("noSignalColorRange", 0.05).asDouble());
 
 		QObject::connect(v4l2Grabber, SIGNAL(emitImage(int, const Image<ColorRgb>&, const int)), protoServer, SLOT(sendImageToProtoSlaves(int, const Image<ColorRgb>&, const int)) );
 

@@ -23,9 +23,9 @@ public:
 			int height,
 			int frameDecimation,
 			int pixelDecimation,
-			double redSignalThreshold,
-			double greenSignalThreshold,
-			double blueSignalThreshold,
+			//double redSignalThreshold,
+			//double greenSignalThreshold,
+			//double blueSignalThreshold,
 			Hyperion * hyperion,
 			int hyperionPriority);
 	virtual ~V4L2Wrapper();
@@ -41,6 +41,10 @@ public slots:
 					 int cropBottom);
 
 	void set3D(VideoMode mode);
+
+	void setNoSignal(int frameDecimation, int pixelCounterThreshold,
+		int blackFrameCounterThreshold, double blackThresholdRed, double blackThresholdGreen, double blackThresholdBlue,
+		int colorFrameCounterThreshold, double colorRed, double colorGreen, double colorBlue, double colorRange);
 
 signals:
 	void emitColors(int priority, const std::vector<ColorRgb> &ledColors, const int timeout_ms);

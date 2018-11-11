@@ -12,9 +12,9 @@ V4L2Wrapper::V4L2Wrapper(const std::string &device,
 		int height,
 		int frameDecimation,
 		int pixelDecimation,
-		double redSignalThreshold,
-		double greenSignalThreshold,
-		double blueSignalThreshold,
+		//double redSignalThreshold,
+		//double greenSignalThreshold,
+		//double blueSignalThreshold,
 		Hyperion *hyperion,
 		int hyperionPriority) :
 	_timeout_ms(1000),
@@ -34,13 +34,13 @@ V4L2Wrapper::V4L2Wrapper(const std::string &device,
 	_timer()
 {
 	// set the signal detection threshold of the grabber
-	_grabber.setSignalThreshold(
-			redSignalThreshold,
-			greenSignalThreshold,
-			blueSignalThreshold,
-			0.2,
-			50,
-			32);
+	//_grabber.setSignalThreshold(
+	//		redSignalThreshold,
+	//		greenSignalThreshold,
+	//		blueSignalThreshold,
+	//		0.2,
+	//		50,
+	//		32);
 
 	// register the image type
 	qRegisterMetaType<Image<ColorRgb>>("Image<ColorRgb>");
@@ -90,6 +90,16 @@ void V4L2Wrapper::set3D(VideoMode mode)
 {
 	_grabber.set3D(mode);
 }
+
+void V4L2Wrapper::setNoSignal(int frameDecimation, int pixelCounterThreshold,
+	int blackFrameCounterThreshold, double blackThresholdRed, double blackThresholdGreen, double blackThresholdBlue,
+	int colorFrameCounterThreshold, double colorRed, double colorGreen, double colorBlue, double colorRange)
+{
+	_grabber.setNoSignal(frameDecimation, pixelCounterThreshold,
+		blackFrameCounterThreshold, blackThresholdRed, blackThresholdGreen, blackThresholdBlue,
+		colorFrameCounterThreshold, colorRed, colorGreen, colorBlue, colorRange);
+}
+
 
 void V4L2Wrapper::newFrame(const Image<ColorRgb> &image)
 {

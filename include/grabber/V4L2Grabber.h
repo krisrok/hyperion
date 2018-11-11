@@ -44,12 +44,9 @@ public slots:
 
 	void set3D(VideoMode mode);
 
-	void setSignalThreshold(double redSignalThreshold,
-					double greenSignalThreshold,
-					double blueSignalThreshold,
-					double thresholdRange,
-					int noSignalFrameCounterThreshold,
-					int noSignalPixelCounterThreshold);
+	void setNoSignal(int frameDecimation, int pixelCounterThreshold,
+		int blackFrameCounterThreshold, double blackThresholdRed, double blackThresholdGreen, double blackThresholdBlue,
+		int colorFrameCounterThreshold, double colorRed, double colorGreen, double colorBlue, double colorRange);
 
 	void start();
 
@@ -114,14 +111,21 @@ private:
 	int _lineLength;
 	int _frameByteSize;
 	int _frameDecimation;
-	int _noSignalFrameCounterThreshold;
-	int _noSignalPixelCounterThreshold;
 
-	ColorRgb _noSignalThresholdColorMin;
-	ColorRgb _noSignalThresholdColorMax;
+	bool _noSignalActive;
+	int _noSignalFrameDecimation;
+	int _noSignalPixelCounterThreshold;
+	
+	int _noSignalBlackFrameCounter;
+	int _noSignalBlackFrameCounterThreshold;
+	ColorRgb _noSignalBlackMax;
+
+	int _noSignalColorFrameCounter;
+	int _noSignalColorFrameCounterThreshold;
+	ColorRgb _noSignalColorMin;
+	ColorRgb _noSignalColorMax;
 
 	int _currentFrame;
-	int _noSignalFrameCounter;
 
 	QSocketNotifier * _streamNotifier;
 
