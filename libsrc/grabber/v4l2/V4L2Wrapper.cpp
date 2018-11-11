@@ -38,7 +38,9 @@ V4L2Wrapper::V4L2Wrapper(const std::string &device,
 			redSignalThreshold,
 			greenSignalThreshold,
 			blueSignalThreshold,
-			50);
+			0.2,
+			50,
+			32);
 
 	// register the image type
 	qRegisterMetaType<Image<ColorRgb>>("Image<ColorRgb>");

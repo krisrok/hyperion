@@ -37,10 +37,11 @@ V4L2Grabber::V4L2Grabber(const std::string & device,
 	_lineLength(-1),
 	_frameByteSize(-1),
 	_frameDecimation(std::max(1, frameDecimation)),
-	_noSignalCounterThreshold(50),
-	_noSignalThresholdColor(ColorRgb{0,0,0}),
+	_noSignalFrameCounterThreshold(50),
+	_noSignalThresholdColorMin(ColorRgb{0,0,0}),
+	_noSignalThresholdColorMax(ColorRgb{10, 10, 10}),
 	_currentFrame(0),
-	_noSignalCounter(0),
+	_noSignalFrameCounter(0),
 	_streamNotifier(nullptr),
 	_imageResampler()
 {
@@ -69,14 +70,22 @@ void V4L2Grabber::set3D(VideoMode mode)
 	_imageResampler.set3D(mode);
 }
 
-void V4L2Grabber::setSignalThreshold(double redSignalThreshold, double greenSignalThreshold, double blueSignalThreshold, int noSignalCounterThreshold)
+void V4L2Grabber::setSignalThreshold(double redSignalThreshold, double greenSignalThreshold, double blueSignalThreshold, double thresholdRange, int noSignalFrameCounterThreshold, int noSignalPixelCounterThreshold)
 {
-	_noSignalThresholdColor.red = uint8_t(255*redSignalThreshold);
-	_noSignalThresholdColor.green = uint8_t(255*greenSignalThreshold);
-	_noSignalThresholdColor.blue = uint8_t(255*blueSignalThreshold);
-	_noSignalCounterThreshold = std::max(1, noSignalCounterThreshold);
+	_noSignalThresholdColorMin.red = uint8_t(std::min(std::max((int)(255 * (redSignalThreshold - thresholdRange)), 0), 255));
+	_noSignalThresholdColorMin.green = uint8_t(std::min(std::max((int)(255 * (greenSignalThreshold - thresholdRange)), 0), 255));
+	_noSignalThresholdColorMin.blue = uint8_t(std::min(std::max((int)(255 * (blueSignalThreshold - thresholdRange)), 0), 255));
+	
+	_noSignalThresholdColorMax.red = uint8_t(std::min(std::max((int)(255 * (redSignalThreshold + thresholdRange)), 0), 255));
+	_noSignalThresholdColorMax.green = uint8_t(std::min(std::max((int)(255 * (greenSignalThreshold + thresholdRange)), 0), 255));
+	_noSignalThresholdColorMax.blue = uint8_t(std::min(std::max((int)(255 * (blueSignalThreshold + thresholdRange)), 0), 255));
+	
+	
+	_noSignalFrameCounterThreshold = std::max(1, noSignalFrameCounterThreshold);
+	
+	_noSignalPixelCounterThreshold = noSignalPixelCounterThreshold;
 
-	std::cout << "V4L2GRABBER INFO: signal threshold set to: " << _noSignalThresholdColor << std::endl;
+	//std::cout << "V4L2GRABBER INFO: signal threshold set to: " << _noSignalThresholdColor << std::endl;
 }
 
 void V4L2Grabber::start()
@@ -673,6 +682,12 @@ void V4L2Grabber::process_image(const uint8_t * data)
 
 	// check signal (only in center of the resulting image, because some grabbers have noise values along the borders)
 	bool noSignal = true;
+
+	int noSignalPixelCounter = 0;
+
+//std::cout << "colMax " << colMax << std::endl;
+
+	//ColorRgb & colMin = _noSignalThresholdColor - _noSignalThresholdColorRange;
 	for (unsigned x = 0; noSignal && x < (image.width()>>1); ++x)
 	{
 		int xImage = (image.width()>>2) + x;
@@ -682,29 +697,41 @@ void V4L2Grabber::process_image(const uint8_t * data)
 			int yImage = (image.height()>>2) + y;
 
 			ColorRgb & rgb = image(xImage, yImage);
-			noSignal &= rgb <= _noSignalThresholdColor;
+			
+			if(((rgb <= _noSignalThresholdColorMax) && (rgb >= _noSignalThresholdColorMin)) == false)
+			{
+				if(++noSignalPixelCounter > _noSignalPixelCounterThreshold)
+				{	noSignal = false; break; }
+			}
+			
+			
+			//noSignal &= (rgb <= colMax) && (rgb >= colMin);
+//if(noSignal == false) std::cout << "col " << rgb << " " << colMax << " " << colMin << std::endl;
+			//noSignal &= rgb <= colMax && rgb >= colMin;
 		}
 	}
 
+//std::cout << noSignalPixelCounter << "/" << _noSignalPixelCounterThreshold << std::endl;
+
 	if (noSignal)
 	{
-		++_noSignalCounter;
+		++_noSignalFrameCounter;
 	}
 	else
 	{
-		if (_noSignalCounter >= _noSignalCounterThreshold)
+		if (_noSignalFrameCounter >= _noSignalFrameCounterThreshold)
 		{
 			std::cout << "V4L2GRABBER INFO: " << "Signal detected" << std::endl;
 		}
 
-		_noSignalCounter = 0;
+		_noSignalFrameCounter = 0;
 	}
 
-	if (_noSignalCounter < _noSignalCounterThreshold)
+	if (_noSignalFrameCounter < _noSignalFrameCounterThreshold)
 	{
 		emit newFrame(image);
 	}
-	else if (_noSignalCounter == _noSignalCounterThreshold)
+	else if (_noSignalFrameCounter == _noSignalFrameCounterThreshold)
 	{
 		std::cout << "V4L2GRABBER INFO: " << "Signal lost" << std::endl;
 	}

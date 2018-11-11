@@ -61,3 +61,9 @@ inline bool operator<=(const ColorRgb & lhs, const ColorRgb & rhs)
 {
 	return (lhs.red <= rhs.red) && (lhs.green <= rhs.green) && (lhs.blue <= rhs.blue);
 }
+
+inline bool operator>=(const ColorRgb & lhs, const ColorRgb & rhs)
+{
+	return (lhs.red >= rhs.red) && (lhs.green >= rhs.green) && (lhs.blue >= rhs.blue);
+}
+

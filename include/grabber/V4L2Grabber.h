@@ -47,7 +47,9 @@ public slots:
 	void setSignalThreshold(double redSignalThreshold,
 					double greenSignalThreshold,
 					double blueSignalThreshold,
-					int noSignalCounterThreshold);
+					double thresholdRange,
+					int noSignalFrameCounterThreshold,
+					int noSignalPixelCounterThreshold);
 
 	void start();
 
@@ -112,12 +114,14 @@ private:
 	int _lineLength;
 	int _frameByteSize;
 	int _frameDecimation;
-	int _noSignalCounterThreshold;
+	int _noSignalFrameCounterThreshold;
+	int _noSignalPixelCounterThreshold;
 
-	ColorRgb _noSignalThresholdColor;
+	ColorRgb _noSignalThresholdColorMin;
+	ColorRgb _noSignalThresholdColorMax;
 
 	int _currentFrame;
-	int _noSignalCounter;
+	int _noSignalFrameCounter;
 
 	QSocketNotifier * _streamNotifier;
 
